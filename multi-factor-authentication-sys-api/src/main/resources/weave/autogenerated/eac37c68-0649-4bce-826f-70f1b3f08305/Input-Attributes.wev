@@ -1,0 +1,36 @@
+%dw 2.0
+
+type auto_eac37c68_0649_4bce_826f_70f1b3f08305_Input_Attributes = Null | {|
+  remoteAddress?: String, 
+  localAddress?: String, 
+  clientCertificate?: java_security_cert_Certificate, 
+  uriParams?: { _?: String }, 
+  queryParams?: { _?: String }, 
+  maskedRequestPath?: String, 
+  statusCode?: Number, 
+  requestPath?: String, 
+  relativePath?: String, 
+  scheme?: String, 
+  version?: String, 
+  method?: String, 
+  rawRequestUri?: String, 
+  rawRequestPath?: String, 
+  reasonPhrase?: String, 
+  requestUri?: String, 
+  queryString?: String, 
+  headers: { _?: String }, 
+  listenerPath?: String
+|}
+type java_security_cert_Certificate = {|
+  encoded?: Binary, 
+  publicKey?: java_security_PublicKey, 
+  "type"?: String
+|} {"typeAlias": "Certificate",
+"typeId": "java.security.cert.Certificate"}
+type java_security_PublicKey = {|  |} {"typeAlias": "PublicKey",
+"typeId": "java.security.PublicKey"}
+
+
+
+
+

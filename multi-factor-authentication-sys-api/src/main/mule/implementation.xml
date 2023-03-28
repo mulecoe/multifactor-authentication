@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd">
+	
+	<flow name="generate-otp-send" doc:id="80e61f4e-4bef-4183-a837-307ac02cd13e" >
+		<set-variable value="#[payload.email]" doc:name="Set email" doc:id="2db58998-fead-4ece-9337-b44c40905475" variableName="OTPEmail"/>
+		<set-variable value="#[payload.phone]" doc:name="Set SMS" doc:id="76bf76ff-9c1a-4431-994e-bce88a27a5bf" variableName="OTPPhoneNumber"/>
+		<flow-ref doc:name="generate OTP" doc:id="90b0e996-84b2-4885-a594-92f11ec2d2ad" name="generate-random-otp" />
+		<flow-ref doc:name="Send OTP" doc:id="2ec5c2a8-6cb8-44da-8030-f5d556598ada" name="email-flow"/>
+		<ee:transform doc:name="Transform Message" doc:id="bb78c42c-35e6-4f1b-900e-2ea77e35c1a2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "tracking_id": vars.trackingid,
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="generate-random-otp" doc:id="eac37c68-0649-4bce-826f-70f1b3f08305" >
+		<ee:transform doc:name="Generating OTP and preparing payload for insertion into MongoDb" doc:id="96969af3-7b7a-4055-bd8b-d9e62e77a9b3">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    otp: ((random() * 1000000) as String {format: "000000"}) as Number
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+			</ee:variables>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="30409de3-4e42-4242-835e-ba2362b45842" variableName="otp" />
+		<ee:transform doc:name="Generating Json string" doc:id="e10eb9bf-9d1b-41e7-ad8e-0ff7cfbfbbc0">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+'{"otp" : "' ++ 
+(payload.otp as String)++ '", '++ 
+'"createdDate" : "'++ now() ++ '"}']]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="pgp-encryption-flow" doc:id="262c82e3-1edd-4255-83b6-3ca2954032ac" name="pgp-encryption-flow" />
+		<set-variable value="#[uuid()]" doc:name="create OTP tracking id" doc:id="fc77f401-7041-4415-8989-1c89d7118937" variableName="trackingid"/>
+		<ee:transform doc:name="Prepare data to insert to MongoDb" doc:id="3fd93954-e335-444e-8726-d9abd0eebdc0">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"tracking_id": vars.trackingid,
+	"otp_data": payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<mongo:insert-document doc:name="Inserting into MongoDB" doc:id="ff1becde-e2a8-4783-850a-765189718f79" config-ref="MongoDB_Config1" collectionName="${mongodb.formdataCollectionName}" />
+		<ee:transform doc:name="Transform Message" doc:id="2f981a8d-333f-4e79-8cca-12d5370e59f3">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "tracking_id": vars.trackingid,
+  "otp" : vars.otp.otp
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="email-flow" doc:id="72429b5a-de99-46b9-9584-bbf993e3036d" >
+		<parse-template doc:name="Parsing OTP template" doc:id="0bf983da-4720-4e8f-810f-b8c03307e224" target="htmlform" targetValue="#[payload]" location="template\otp_template.html">
+		</parse-template>
+		<ee:transform doc:name="Setting the payload to multipart format" doc:id="d38b6bb6-7f48-4ed2-9827-861b461def49">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Binaries
+output multipart/form-data
+---
+{
+  "parts": {
+    "files": {
+      "headers": {
+        "Content-Disposition": {
+          "name": "realtime",
+          "subtype": "form-data"
+        },
+        "Content-Type": "text/plain"
+      },
+      "content": "Yes"
+    },
+    "files": {
+      "headers": {
+        "Content-Disposition": {
+          "name": "subject-line",
+          "subtype": "form-data"
+        },
+        "Content-Type": "text/plain"
+      },
+      "content": "OTP"
+    },
+    "files": {
+      "headers": {
+        "Content-Disposition": {
+          "name": "channel",
+          "subtype": "form-data"
+        },
+        "Content-Type": "text/plain"
+      },
+      "content": "EMAIL"
+    },
+    "files": {
+      "headers": {
+        "Content-Disposition": {
+          "name": "email-id",
+          "subtype": "form-data"
+        },
+        "Content-Type": "text/plain"
+      },
+      "content": vars.'OTPEmail'
+    },
+    "files": {
+            "headers": {
+                "Content-Disposition": {
+                    "name": "body-html",
+                    "filename": "otp_template.html",
+                    "subtype": "form-data"
+                },
+                "Content-Type": "text/html"
+            },
+            "content": vars.htmlform
+        }
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="Sending email through comms accelerator" doc:id="92e72095-ae4e-4c35-8e50-05d77af0d391" url="http://nous-comms-accelerator.sg-s1.cloudhub.io/api/comms/notify/email" />
+	</flow>
+	<flow name="verify-otp" doc:id="bbce6a0a-c311-4e4a-a620-06a4101fb464">
+		<set-variable value="#[payload.otp]" doc:name="Set Variable" doc:id="dae98896-1153-49cd-9ef5-07578c793afe" variableName="otpInput"/>
+		<mongo:find-documents doc:name="get documents" doc:id="072ff1a9-ddb0-484c-a1f2-642afb03c06c" config-ref="MongoDB_Config1" collectionName="${mongodb.formdataCollectionName}" fields=",">
+            <mongo:query><![CDATA[#[{
+    "tracking_id": payload.tracking_id
+}]]]></mongo:query>
+        </mongo:find-documents>
+        <ee:transform doc:name='remove "_id"' doc:id="f011a4e3-4717-43e4-8c9a-c6d4d9c1499f">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ((item, index)->
+    item mapObject {
+        '$$' : $
+    } - "_id"
+)]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <ee:transform doc:name="prepare for decrption" doc:id="ca888e91-cd21-4954-9c5d-2e005e4ef484">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+payload[0].otp_data
+]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <flow-ref doc:name="pgp-decryption-flow" doc:id="5060d808-539c-4803-b131-198f5c6b73a3" name="pgp-decryption-flow" />
+		<choice doc:name="Choice" doc:id="8dc05b05-4afd-474d-919d-2a1f609570e2" >
+			<when expression="#[vars.otpInput == payload.otp]">
+				<flow-ref doc:name="verifying-api Flow" doc:id="c05d9792-24de-45ba-9fc2-5e5c816dcbb1" name="check-otp-expiry" />
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="d795886a-2165-404c-b708-7c736416dd9e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "message": "otp is invalid."
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+    
+
+</flow>
+    <flow name="check-otp-expiry" doc:id="f760df04-982d-48fd-8ded-ef205ba20fec" >
+        <set-variable value="#[%dw 2.0
+output application/java
+---
+((now() as DateTime - (payload.createdDate as DateTime)) as Number {unit: &quot;seconds&quot;}) &gt; ('${expirySeconds}' as Number)]" doc:name="vars.expired" doc:id="9f055cfa-735d-4bf4-9546-58cb2b571d68" variableName="expired"/>
+        <ee:transform doc:name="Prepare Payload for OTP expiration" doc:id="0837224a-7a48-465c-817f-198ffea0b965" >
+            <ee:message >
+                <ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.expired]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <choice doc:name="Checking for OTP expiration" doc:id="bfb4fabf-0fb2-44c9-a1e8-45814a636a0b" >
+			<when expression="#[vars.expired==false]">
+				<ee:transform doc:name="Response Message" doc:id="6b033e9e-0824-49c4-aa8c-b019d28db02d">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "message": "otp is verified"
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+
+            </when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="b6c71d17-c04c-47fc-99cc-919ccaeeb0a1" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "message": "otp has expired. Please generate a new one."
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+
+            </otherwise>
+
+        </choice>
+    
+</flow>
+	</mule>
