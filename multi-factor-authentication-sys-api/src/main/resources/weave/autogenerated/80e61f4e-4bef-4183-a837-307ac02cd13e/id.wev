@@ -1,4 +1,0 @@
-%dw 2.0
-
-type auto_80e61f4e_4bef_4183_a837_307ac02cd13e_Output_Variables_unique_id = {| tracking_id: String | Null |}
-

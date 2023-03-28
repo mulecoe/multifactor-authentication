@@ -1,9 +1,0 @@
-http:
-  port: "8081"
-
-mongodb:
-  connectionString: "mongodb+srv://prakashsr:rqEICMCTPE5y0P4M@fiscluster.ulxri.mongodb.net/Tracking?retryWrites=true&w=majority"
-  formdataCollectionName : "tracking-details"
-  formsConnectionstring: "mongodb+srv://prakashsr:rqEICMCTPE5y0P4M@fiscluster.ulxri.mongodb.net/generic-forms-accelerator?retryWrites=true&w=majority"
-  formsCollectionName : "forms-data"
-expirySeconds: "600"

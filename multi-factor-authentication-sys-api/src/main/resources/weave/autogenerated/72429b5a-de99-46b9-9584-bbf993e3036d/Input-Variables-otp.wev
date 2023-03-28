@@ -1,4 +1,0 @@
-%dw 2.0
-
-type auto_72429b5a_de99_46b9_9584_bbf993e3036d_Input_Variables_otp = {| otp: Number |}
-
