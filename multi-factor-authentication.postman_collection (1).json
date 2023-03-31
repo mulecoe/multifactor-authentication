@@ -1,0 +1,252 @@
+{
+	"info": {
+		"_postman_id": "4a2fd1c7-fa24-4586-bf8d-e5cc461eabd8",
+		"name": "multi-factor-authentication",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Bankingpov",
+			"item": [
+				{
+					"name": "email sys api",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "type",
+									"value": "email",
+									"type": "text"
+								},
+								{
+									"key": "accountid",
+									"value": "435372537253723",
+									"type": "text"
+								},
+								{
+									"key": "first_name",
+									"value": "agnel",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "roysten",
+									"type": "text"
+								},
+								{
+									"key": "dob",
+									"value": "14-08-2000",
+									"type": "text"
+								},
+								{
+									"key": "gender",
+									"value": "Male",
+									"type": "text"
+								},
+								{
+									"key": "address_street",
+									"value": "Darlington bridge",
+									"type": "text"
+								},
+								{
+									"key": "address_city",
+									"value": "Bangalore",
+									"type": "text"
+								},
+								{
+									"key": "address_zipcode",
+									"value": "533563",
+									"type": "text"
+								},
+								{
+									"key": "address_state",
+									"value": "Karnataka",
+									"type": "text"
+								},
+								{
+									"key": "address_country",
+									"value": "India",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "8635363536",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "bronnv8@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "nationality",
+									"value": "Indian",
+									"type": "text"
+								},
+								{
+									"key": "pan_number",
+									"value": "536353",
+									"type": "text"
+								},
+								{
+									"key": "passport_number",
+									"value": "635373573",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8081/notify/customer?recipient=bronnv8@gmail.com",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"notify",
+								"customer"
+							],
+							"query": [
+								{
+									"key": "recipient",
+									"value": "bronnv8@gmail.com"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "generate-otp-send-sys-api",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Prakash\",\r\n    \"dob\": \"10-01-1998\",\r\n    \"email\": \"bronnv8@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://multi-factor-authentication-api.sg-s1.cloudhub.io/api/generate-otp-send",
+					"protocol": "http",
+					"host": [
+						"multi-factor-authentication-api",
+						"sg-s1",
+						"cloudhub",
+						"io"
+					],
+					"path": [
+						"api",
+						"generate-otp-send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "random-otp-sys-api",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Prakash\",\r\n    \"dob\": \"10-01-1998\",\r\n    \"email\": \"bronnv8@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://multi-factor-authentication-api.sg-s1.cloudhub.io/api/generate-random-otp",
+					"protocol": "http",
+					"host": [
+						"multi-factor-authentication-api",
+						"sg-s1",
+						"cloudhub",
+						"io"
+					],
+					"path": [
+						"api",
+						"generate-random-otp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "verify-otp-sys-api",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"tracking_id\": \"ca552b13-09db-4859-a165-8e0f5cafce9e\",\r\n    \"otp\": \"303004\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://multi-factor-authentication-api.sg-s1.cloudhub.io/api/verify-otp",
+					"protocol": "http",
+					"host": [
+						"multi-factor-authentication-api",
+						"sg-s1",
+						"cloudhub",
+						"io"
+					],
+					"path": [
+						"api",
+						"verify-otp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "forms-accelerator",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"uuid\": \"436dhfjfiti7t\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://forms-accelerator-api.sg-s1.cloudhub.io/api/nous/mulesoftforms/generate/c366af40-c1bd-4b67-9224-02c72fb1a291",
+					"protocol": "http",
+					"host": [
+						"forms-accelerator-api",
+						"sg-s1",
+						"cloudhub",
+						"io"
+					],
+					"path": [
+						"api",
+						"nous",
+						"mulesoftforms",
+						"generate",
+						"c366af40-c1bd-4b67-9224-02c72fb1a291"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
