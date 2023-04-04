@@ -76,7 +76,7 @@ output application/json
 		</ee:transform>
 	</flow>
 	<flow name="email-flow" doc:id="72429b5a-de99-46b9-9584-bbf993e3036d" >
-		<parse-template doc:name="Parsing OTP template" doc:id="0bf983da-4720-4e8f-810f-b8c03307e224" target="htmlform" targetValue="#[payload]" location="template\otp_template.html">
+		<parse-template doc:name="Parsing OTP template" doc:id="0bf983da-4720-4e8f-810f-b8c03307e224" target="htmlform" targetValue="#[payload]" location="otp_template.html">
 		</parse-template>
 		<ee:transform doc:name="Setting the payload to multipart format" doc:id="d38b6bb6-7f48-4ed2-9827-861b461def49">
 			<ee:message>
